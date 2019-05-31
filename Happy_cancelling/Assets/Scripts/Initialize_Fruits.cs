@@ -22,12 +22,16 @@ public class Initialize_Fruits : MonoBehaviour
 
     public float anim_time = 1.0f; //time last for anim
 
+    //消除化代码引用
+    public Cancellable cancelProcess;
+
 
     // Start is called before the first frame update
     void Start()
     {
         init_Positions();
-        init_PicsTypes();
+        init_PicsTypes(); //FruitTypes被初始化
+
         //for (int i = 0; i <= 2; i++)
         //    for (int j = 0; j <= 2; j++)
         //        Debug.Log(PicPositions[i][j]);
@@ -35,6 +39,10 @@ public class Initialize_Fruits : MonoBehaviour
         pic_A = null;
         pic_B = null;
         pic_A_script = pic_B_script = null;
+
+        //初始化消除代码
+        cancelProcess = GetComponent<Cancellable>();
+        cancelProcess.fruit_types = FruitTypes;
         
     }
 
@@ -68,6 +76,9 @@ public class Initialize_Fruits : MonoBehaviour
             if (!isAnimating) //上一帧有动画, 而这一帧没有动画了, 表示A, B两段动画已经播放完毕了, 那么重置pic_A和pic_B的值
             {
                 pic_A = pic_B = null;
+
+                //进行消除处理
+                cancelProcess.cancelProcessEvent.Invoke();
             }
         }
 
