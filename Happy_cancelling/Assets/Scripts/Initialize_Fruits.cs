@@ -10,6 +10,9 @@ public class Initialize_Fruits : MonoBehaviour
     //use int to save fruit types. In this case, its dimension is 3*3
     public int[][] FruitTypes;
 
+    //存储水果的名称数组
+    public string[][] FruitNames;
+
     //Exchange pic_A and pic_B
     public GameObject pic_A;
     public GameObject pic_B;
@@ -24,7 +27,8 @@ public class Initialize_Fruits : MonoBehaviour
 
     //消除化代码引用
     public Cancellable cancelProcess;
-
+    //下落动画脚本
+    public FallingDownAnim fallingProcess;
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +47,9 @@ public class Initialize_Fruits : MonoBehaviour
         //初始化消除代码
         cancelProcess = GetComponent<Cancellable>();
         cancelProcess.fruit_types = FruitTypes;
+
+        //初始化下落动画脚本
+        fallingProcess = GetComponent<FallingDownAnim>();
         
     }
 
@@ -66,6 +73,10 @@ public class Initialize_Fruits : MonoBehaviour
                 exchange(pic_A, pic_B);
                 //exchange FruitTypes
                 exchangeType(pic_A_script, pic_B_script, FruitTypes);
+                //exchange FruitNames
+                exchangeName(pic_A_script, pic_B_script, FruitNames);
+                //exchange row and column properties
+                exchangeRowCol(pic_A_script, pic_B_script);
 
             }
         }
@@ -79,6 +90,9 @@ public class Initialize_Fruits : MonoBehaviour
 
                 //进行消除处理
                 cancelProcess.cancelProcessEvent.Invoke();
+
+                //创建下落动画
+                fallingProcess.fallingProcessEvent.Invoke();
             }
         }
 
@@ -120,12 +134,17 @@ public class Initialize_Fruits : MonoBehaviour
         return path;
     }
 
+    //初始化水果种类数组和名称数组
     void init_PicsTypes()
     {
         FruitTypes = new int[3][];
+        FruitNames = new string[3][];
+
         for (int i = 0; i <= 2; i++)
         {
             int[] tmpTypes = new int[3];
+            string[] tmpNames = new string[3];
+
             for (int j = 0; j <= 2; j++)
             {
                 //generate a random type of 3 types
@@ -136,6 +155,10 @@ public class Initialize_Fruits : MonoBehaviour
                 string PicPath = TypeToPath(currentType);
                 //create sprite at current position
                 GameObject currentObject = new GameObject("fruit_" + i + j);
+
+                //更新水果名称数组
+                tmpNames[j] = currentObject.name;
+
                 //set position for current picture
                 currentObject.transform.position = PicPositions[i][j];
                 SpriteRenderer render = currentObject.AddComponent<SpriteRenderer>() as SpriteRenderer;
@@ -158,6 +181,7 @@ public class Initialize_Fruits : MonoBehaviour
                 currentObject.AddComponent<Animation>();
             }
             FruitTypes[i] = tmpTypes; //assign current row fruit types to FruitTypes array
+            FruitNames[i] = tmpNames; //assign names to FruitNames array
         }
             
     }
@@ -173,7 +197,7 @@ public class Initialize_Fruits : MonoBehaviour
         Debug.Log("pics exchanged");
     }
 
-    void create_animation(GameObject pic, Vector3 dest_position)  // dest_position means destination position
+    public void create_animation(GameObject pic, Vector3 dest_position)  // dest_position means destination position
     {
         AnimationClip clip = new AnimationClip();
         clip.legacy = true;
@@ -225,6 +249,34 @@ public class Initialize_Fruits : MonoBehaviour
         //exchange types in typeArray
         typeArray[rowA][colA] = typeB;
         typeArray[rowB][colB] = typeA;
+
+        
+    }
+
+    void exchangeName(SelectFruit fruitA, SelectFruit fruitB, string[][] nameArray)
+    {
+        int rowA = fruitA.row;
+        int colA = fruitA.col;
+        int rowB = fruitB.row;
+        int colB = fruitB.col;
+
+        //store current names
+        string nameA = nameArray[rowA][colA];
+        string nameB = nameArray[rowB][colB];
+
+        //exchange names in nameArray
+        nameArray[rowA][colA] = nameB;
+        nameArray[rowB][colB] = nameA;
+
+
+    }
+
+    void exchangeRowCol(SelectFruit fruitA, SelectFruit fruitB)
+    {
+        int rowA = fruitA.row;
+        int colA = fruitA.col;
+        int rowB = fruitB.row;
+        int colB = fruitB.col;
 
         //refresh row and col in fruitA and fruitB
         fruitA.row = rowB;

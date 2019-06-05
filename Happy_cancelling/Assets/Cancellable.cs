@@ -15,22 +15,26 @@ public class Cancellable : MonoBehaviour
         public int j;
     };
     //数组每一行代表要消除的一组
-    public PositionStruct[][] posToCancel;
+    public PositionStruct[][] posToCancel = null;
     //要消除的组的个数
     private int groupsToCancle;
     //存储每一组要消除的个数
     public int[] numToCancel;
     public int[][] fruit_types; //!!!! fruit_types 在 Initialize_Fruits start()代码中初始化 !!!!!
 
+    //记录水果的名字
+    private string[][] fruit_names;
+
     //水果数组的行数和列数
-    int ROWS = 3;
-    int COLS = 3;
+    public static int ROWS = 3;
+    public static int COLS = 3;
 
     private void Start()
     {
         //get fruit's script
         fruit_script = GameObject.Find("Fruits").GetComponent<Initialize_Fruits>();
 
+        StartCoroutine(lateStart(0.4f));
         //!!!! fruit_types 在 Initialize_Fruits start()代码中初始化 !!!!!
 
         //消除处理事件
@@ -38,6 +42,55 @@ public class Cancellable : MonoBehaviour
             cancelProcessEvent = new UnityEvent();
 
         cancelProcessEvent.AddListener(cancleBegin);
+        cancelProcessEvent.AddListener(markUp); //标记待消除元素
+        cancelProcessEvent.AddListener(cancelFruit); //删除水果
+
+    }
+
+    IEnumerator lateStart(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+        fruit_names = fruit_script.FruitNames;
+    }
+
+    //标记待消除元素类型为-1
+    public void markUp()
+    {
+        int row;
+        int col;
+        if (groupsToCancle != 0)
+        {
+            for(int m = 0; m < groupsToCancle; m++)
+            {
+                for(int n = 0; n < numToCancel[m]; n++)
+                {
+                    row = posToCancel[m][n].i;
+                    col = posToCancel[m][n].j;
+                    fruit_types[row][col] = -1;
+                }
+            }
+        }
+    }
+
+    //删除水果
+    public void cancelFruit()
+    {
+        int row;
+        int col;
+        GameObject currFruit;
+        if (groupsToCancle != 0)
+        {
+            for (int m = 0; m < groupsToCancle; m++)
+            {
+                for (int n = 0; n < numToCancel[m]; n++)
+                {
+                    row = posToCancel[m][n].i;
+                    col = posToCancel[m][n].j;
+                    currFruit = GameObject.Find(fruit_names[row][col]);
+                    Destroy(currFruit);
+                }
+            }
+        }
     }
 
     //横向和纵向处理
