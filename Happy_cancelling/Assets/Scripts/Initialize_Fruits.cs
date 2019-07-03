@@ -12,6 +12,7 @@ public class Initialize_Fruits : MonoBehaviour
 
     //存储水果的名称数组
     public string[][] FruitNames;
+    public string[] NameList = new string[9];
 
     //Exchange pic_A and pic_B
     public GameObject pic_A;
@@ -25,10 +26,15 @@ public class Initialize_Fruits : MonoBehaviour
 
     public float anim_time = 1.0f; //time last for anim
 
+    public float timeToCancelFruits = 0;
+    public bool isToCancel = false;
+
     //消除化代码引用
     public Cancellable cancelProcess;
     //下落动画脚本
     public FallingDownAnim fallingProcess;
+    //重新创建水果脚本
+    public RecreateFruit recreateProcess;
 
     // Start is called before the first frame update
     void Start()
@@ -50,6 +56,9 @@ public class Initialize_Fruits : MonoBehaviour
 
         //初始化下落动画脚本
         fallingProcess = GetComponent<FallingDownAnim>();
+
+        //初始化重现创建水果的脚本
+        recreateProcess = GetComponent<RecreateFruit>();
         
     }
 
@@ -75,6 +84,7 @@ public class Initialize_Fruits : MonoBehaviour
                 exchangeType(pic_A_script, pic_B_script, FruitTypes);
                 //exchange FruitNames
                 exchangeName(pic_A_script, pic_B_script, FruitNames);
+                //exchangeFruitName(pic_A, pic_B);
                 //exchange row and column properties
                 exchangeRowCol(pic_A_script, pic_B_script);
 
@@ -89,13 +99,57 @@ public class Initialize_Fruits : MonoBehaviour
                 pic_A = pic_B = null;
 
                 //进行消除处理
-                cancelProcess.cancelProcessEvent.Invoke();
+                //cancelProcess.cancelProcessEvent.Invoke();
+                cancelProcess.cancleBegin();
+                cancelProcess.markUp();
+                cancelProcess.cancelFruit();
 
                 //创建下落动画
-                fallingProcess.fallingProcessEvent.Invoke();
+                //fallingProcess.fallingProcessEvent.Invoke();
+                fallingProcess.animateFalling(); //触发isToCancel = true;
+
+                for(int i = 0; i < Cancellable.ROWS; i++)
+                {
+                    for(int j = 0; j < Cancellable.COLS; j++)
+                    {
+                        if (FruitTypes[i][j] == -1)
+                        {
+                            isToCancel = true;
+                            break;
+                        }
+                    }
+                }
+
+                //更新一维名称数组, 以方便取名
+                //refreshNameList();
+                
             }
         }
 
+        //如果要消除, 则积累时间开始
+        if (isToCancel)
+        {
+            timeToCancelFruits += Time.deltaTime;
+            Debug.Log("timeToCancel is " + timeToCancelFruits);
+            if (timeToCancelFruits > 2.0f)
+            {
+                recreateProcess.recreateFruits();
+                timeToCancelFruits = 0;
+                isToCancel = false;
+            }
+        }
+
+    }
+
+    public void refreshNameList()
+    {
+        for(int i = 0; i < Cancellable.ROWS; i++)
+        {
+            for(int j=0; j < Cancellable.COLS; j++)
+            {
+                NameList[(i * Cancellable.ROWS) + j] = FruitNames[i][j];
+            }
+        }
     }
 
     //generate a position array, store all fruit positions
@@ -116,7 +170,7 @@ public class Initialize_Fruits : MonoBehaviour
     }
 
     //use currentType to decide which picture to choose
-    string TypeToPath(int currentType)
+    public string TypeToPath(int currentType)
     {
         string path;
         switch (currentType)
@@ -270,6 +324,7 @@ public class Initialize_Fruits : MonoBehaviour
 
 
     }
+
 
     void exchangeRowCol(SelectFruit fruitA, SelectFruit fruitB)
     {

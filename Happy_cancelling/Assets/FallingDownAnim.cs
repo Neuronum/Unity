@@ -77,6 +77,10 @@ public class FallingDownAnim : MonoBehaviour
                 }
             }
 
+            //更新参数
+            refreshParam();
+
+
             //重置LEN, positions和destinations
             positions = null;
             destinations = null;
@@ -86,7 +90,7 @@ public class FallingDownAnim : MonoBehaviour
     }
 
     //更新fruit_types, fruit_names, 以及fruit row & col
-    void refreshParam()
+    public void refreshParam()
     {
         if (LEN > 0)
         {
@@ -103,7 +107,7 @@ public class FallingDownAnim : MonoBehaviour
                 //更新下落后的类型数组fruit_script.FruitTypes;
                 //更新当前位置和目标位置
                 currPos = positions[i];
-                destPos.i = vacPos.i + i;
+                destPos.i = vacPos.i - i;
                 //目标位置变为当前位置种类
                 fruit_types[destPos.i][destPos.j] = fruit_types[currPos.i][currPos.j];
                 //当前位置种类设为-1
@@ -115,11 +119,11 @@ public class FallingDownAnim : MonoBehaviour
                 fruit_names[currPos.i][currPos.j] = "Null";
 
                 //更新下落后的row和col, 本句需在更新名称数组之后
+                Debug.Log("fruit to find: " + fruit_names[destPos.i][destPos.j]);
                 currFruit = GameObject.Find(fruit_names[destPos.i][destPos.j]);
                 currScript = currFruit.GetComponent<SelectFruit>();
                 currScript.row = destPos.i;
                 currScript.col = destPos.j;
-
             }
         }
     }
@@ -171,7 +175,10 @@ public class FallingDownAnim : MonoBehaviour
             //当currType为-1, 即此位为空时, 存储当前空位
             if(currType == -1)
             {
-
+                //存储该空位位置, 供refreshParam调用
+                vacPos = new Cancellable.PositionStruct();
+                vacPos.i = vacancy;
+                vacPos.j = colIndex;
                 //从上到下查找最下方要移动的水果
                 for(int fruitIndex = 0; fruitIndex <= vacancy; fruitIndex++)
                 {

@@ -181,8 +181,8 @@ public class Cancellable : MonoBehaviour
 
         while (flag)
         {
-            //循环比较当前位置的水果和右侧水果是否相同, 相同就继续向右比较
-            if (currType == nextType)
+            //循环比较当前位置的水果和右侧水果是否相同, 相同就继续向右比较, 注意值为-1时表示空
+            if (currType!=-1 && currType == nextType)
             {
                 Debug.Log("Same fruit found, position: i = " + nextpos.i + "; j = " + nextpos.j);
                 sameNum++;
@@ -254,8 +254,8 @@ public class Cancellable : MonoBehaviour
 
         while (flag)
         {
-            //循环比较当前位置的水果和右侧水果是否相同, 相同就继续向右比较
-            if (currType == nextType)
+            //循环比较当前位置的水果和右侧水果是否相同, 相同就继续向右比较, 注意值为-1时表示空
+            if (currType != -1 && currType == nextType)
             {
                 Debug.Log("Vertically same fruit found, position: i = " + nextpos.i + "; j = " + nextpos.j);
                 sameNum++;
