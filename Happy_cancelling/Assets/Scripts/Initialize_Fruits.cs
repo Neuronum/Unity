@@ -176,13 +176,13 @@ public class Initialize_Fruits : MonoBehaviour
         switch (currentType)
         {
             case 0:
-                path = "Fruits/Apple";
+                path = "Fruits-Intel/Apple";
                 break;
             case 1:
-                path = "Fruits/Banana";
+                path = "Fruits-Intel/Banana";
                 break;
             default :
-                path = "Fruits/Strawberry";
+                path = "Fruits-Intel/Strawberry";
                 break;
         }
         return path;
